@@ -33,7 +33,6 @@ const cartSlice = createSlice({
 
   
   reducers: {
-    // =========== add item ============
     addItem(state, action) {
       const newItem = action.payload;
       const id = action.payload.id;
@@ -117,7 +116,35 @@ const cartSlice = createSlice({
         state.totalQuantity
       );
     },
+    checkoutComplete: (state) => {
+      // Reset the cart items when checkout is complete
+      state.cartItems = [];
+      state.totalAmount = 0;
+      state.totalQuantity = 0;
+    },
+    checkoutComplete(state, action) {
+      const id = action.payload;
+      const existingItem = state.cartItems.find((item) => item.id === id);
+      state.totalQuantity--;
 
+      if (existingItem.quantity === 1) {
+        state.cartItems = state.cartItems.filter((item) => item.id !== id);
+      } else {
+        existingItem.quantity--;
+        existingItem.totalPrice =
+          Number(existingItem.totalPrice) - Number(existingItem.price);
+      }
+
+      state.totalAmount = state.cartItems.reduce(
+        (total, item) => total + Number(item.price) * Number(item.quantity),
+        0
+      );
+      setItemFunc(
+        state.cartItems.map((item) => item),
+        state.totalAmount,
+        state.totalQuantity
+      );
+    },
     //============ delete item ===========
 
     deleteItem(state, action) {
